@@ -1,0 +1,16 @@
+{
+  "id": "./index.html",
+  "name": "WorkCulvert — কাজ ও কর্মীর সংযোগ",
+  "short_name": "WorkCulvert",
+  "description": "কাজদাতা ও কর্মীর মধ্যে স্থানীয় কাজের সংযোগ প্ল্যাটফর্ম।",
+  "lang": "bn-BD",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f8f6",
+  "theme_color": "#075b45",
+  "icons": [
+    { "src": "./pwa-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

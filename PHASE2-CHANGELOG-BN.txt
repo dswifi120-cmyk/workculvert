@@ -1,0 +1,8 @@
+PHASE 2 CHANGELOG
+- Worker registration routes through Firebase Email/Password signup.
+- Worker dashboard requires authenticated Worker role and stores profile by UID.
+- Employer dashboard requires authenticated Employer role, saves profile by UID, and tags jobs with employerUid.
+- Admin login uses Firebase Auth and checks users/<UID>/role === admin; client-controlled sessionStorage login removed.
+- Admin page checks role before reading basic user/job summaries.
+- Homepage no longer exposes an unauthenticated job posting form; job list is shown only after sign-in.
+- Not yet complete: database rules migration, legacy data migration, applications, job completion, ratings, reviews, complaints, and end-to-end live testing.

@@ -1,0 +1,13 @@
+WORKCULVERT ZIP CODE AUDIT — 2026-10-22
+
+Confirmed from source before upgrade:
+- Original admin-login.html contained hard-coded credentials (admin / work1234) and stored a boolean in sessionStorage. In this upgrade copy, admin-login.html uses Firebase Email/Password and checks users/<uid>/role === admin.
+- Original admin.html checked a client-controlled sessionStorage boolean. In this upgrade copy, its data listeners start only after Firebase Auth and the admin role check pass.
+- worker-dashboard.html searches all workers by phone number; no Firebase Auth login.
+- employer-profile.html accepts name/phone and reads/writes employers/<phone>; no Firebase Auth login.
+- index.html allows job submission without authenticated employer and writes jobs without employer UID.
+- worker-register.html creates worker record under a push-generated key and has no email/password signup.
+- all pages use Firebase Realtime Database; this ZIP does not include the deployed live Rules, so their current state cannot be verified from the ZIP alone.
+- no complete applications/reviews/complaints end-to-end workflow was confirmed in this source review.
+
+This audit is source-code inspection, not a live deployment test.

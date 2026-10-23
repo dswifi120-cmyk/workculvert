@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WorkCulvert — নিরাপদ লগইন</title>
+<link rel="stylesheet" href="workculvert-ui.css">
+<style>
+body{margin:0;background:#f1f5f9;font-family:system-ui,sans-serif;color:#0f172a}
+.auth-wrap{max-width:480px;margin:5vh auto;padding:18px}
+.auth-card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:24px;box-shadow:0 12px 35px #0f172a12}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}.brand img{width:54px;height:54px}
+h1{font-size:24px;margin:0 0 6px}.muted{color:#64748b;font-size:14px}
+label{display:block;font-size:14px;font-weight:650;margin:14px 0 6px}
+input,select{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit}
+button{width:100%;margin-top:16px;padding:12px;border:0;border-radius:10px;background:#047857;color:white;font-weight:750;font-size:15px;cursor:pointer}
+button.secondary{background:#e2e8f0;color:#0f172a}
+.notice{padding:12px;border-radius:10px;background:#fef3c7;color:#92400e;font-size:13px;margin:14px 0}
+#msg{font-size:14px;margin-top:12px;overflow-wrap:anywhere}
+.links{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="auth-wrap"><div class="auth-card">
+<div class="brand"><img src="workculvert-logo.svg" alt="WorkCulvert logo"><div><h1>WorkCulvert</h1><div class="muted">যেকোনো কাজ, উপযুক্ত কর্মী।</div></div></div>
+<p class="muted">ইমেইল ও পাসওয়ার্ড দিয়ে অ্যাকাউন্ট খুলুন অথবা লগইন করুন।</p>
+<div class="notice">নতুন অ্যাকাউন্টে Worker বা Employer ভূমিকা বেছে নিন। Admin ভূমিকা এই ফর্ম থেকে তৈরি করা যায় না; Firebase Console থেকে অনুমোদিত Admin-কে আলাদাভাবে সেট করতে হবে।</div>
+<form id="authForm">
+<label for="mode">কী করতে চান?</label><select id="mode"><option value="login">লগইন</option><option value="signup">নতুন অ্যাকাউন্ট খুলুন</option></select>
+<div id="roleWrap" hidden><label for="role">অ্যাকাউন্টের ধরন</label><select id="role"><option value="worker">Worker / কর্মী</option><option value="employer">Employer / নিয়োগদাতা</option></select></div>
+<label for="email">ইমেইল</label><input id="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com">
+<label for="password">পাসওয়ার্ড</label><input id="password" type="password" autocomplete="current-password" required minlength="6" placeholder="কমপক্ষে ৬ অক্ষর">
+<button id="submitBtn" type="submit">লগইন করুন</button>
+</form>
+<div id="msg" role="status" aria-live="polite"></div>
+<div class="links"><a href="index.html">হোমপেজে ফিরুন</a><a href="README-BN.txt">সেটআপ নির্দেশনা</a></div>
+</div></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase, ref, get, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+const firebaseConfig = {
+ apiKey: "AIzaSyDUgBWJZ_-61qoifMqiuVaXHULtF1Dma2I",
+ authDomain: "workculvert-web.firebaseapp.com",
+ databaseURL: "https://workculvert-web-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId: "workculvert-web",
+ storageBucket: "workculvert-web.firebasestorage.app",
+ messagingSenderId: "968194354431",
+ appId: "1:968194354431:web:20192af00dceee43a830ca"
+};
+const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getDatabase(app);
+const form=document.getElementById('authForm'), mode=document.getElementById('mode'), roleWrap=document.getElementById('roleWrap'), msg=document.getElementById('msg'), btn=document.getElementById('submitBtn');
+mode.addEventListener('change',()=>{roleWrap.hidden=mode.value!=='signup';btn.textContent=mode.value==='signup'?'অ্যাকাউন্ট তৈরি করুন':'লগইন করুন';document.getElementById('password').autocomplete=mode.value==='signup'?'new-password':'current-password';});
+function show(text,ok=false){msg.textContent=text;msg.style.color=ok?'#047857':'#b91c1c';}
+function friendlyError(e){const map={'auth/invalid-credential':'ইমেইল বা পাসওয়ার্ড সঠিক নয়।','auth/email-already-in-use':'এই ইমেইলে অ্যাকাউন্ট আগে থেকেই আছে।','auth/weak-password':'আরও শক্তিশালী পাসওয়ার্ড দিন (কমপক্ষে ৬ অক্ষর)।','auth/invalid-email':'সঠিক ইমেইল লিখুন।','auth/too-many-requests':'অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।','auth/network-request-failed':'ইন্টারনেট সংযোগ পরীক্ষা করুন।'};return map[e.code]||'কাজটি সম্পন্ন হয়নি। Firebase Authentication সেটিংস এবং সংযোগ পরীক্ষা করুন। ('+(e.code||'unknown')+')';}
+form.addEventListener('submit',async e=>{
+ e.preventDefault();btn.disabled=true;show('প্রসেস হচ্ছে…');
+ try{
+  const email=document.getElementById('email').value.trim().toLowerCase(), password=document.getElementById('password').value;
+  let credential;
+  if(mode.value==='signup'){
+   credential=await createUserWithEmailAndPassword(auth,email,password);
+   const uid=credential.user.uid, role=document.getElementById('role').value;
+   await set(ref(db,'users/'+uid),{uid,email,role,createdAt:Date.now(),status:'active'});
+   if(role==='worker') await set(ref(db,'workers/'+uid),{uid,email,verified:false,createdAt:Date.now()});
+   if(role==='employer') await set(ref(db,'employers/'+uid),{uid,email,createdAt:Date.now()});
+   show('অ্যাকাউন্ট তৈরি হয়েছে। এখন আপনার প্রোফাইলের তথ্য সম্পূর্ণ করতে হবে।',true);
+  }else{
+   credential=await signInWithEmailAndPassword(auth,email,password);
+   const snap=await get(ref(db,'users/'+credential.user.uid));
+   if(!snap.exists()||!snap.val().role){show('অ্যাকাউন্টে ভূমিকা সেট করা নেই। Admin-এর সাহায্য নিন।');await auth.signOut();return;}
+   show('লগইন সফল।',true);
+  }
+  const snap=await get(ref(db,'users/'+auth.currentUser.uid));
+  const role=snap.exists()?snap.val().role:'';
+  setTimeout(()=>{if(role==='admin')location.href='admin.html';else if(role==='worker')location.href='worker-dashboard.html';else if(role==='employer')location.href='employer-profile.html';else location.href='index.html';},650);
+ }catch(e){show(friendlyError(e));}finally{btn.disabled=false;}
+});
+onAuthStateChanged(auth,async user=>{
+ if(!user)return;
+ try{const s=await get(ref(db,'users/'+user.uid));if(s.exists()&&s.val().role){show('আপনি ইতোমধ্যে লগইন করা আছেন। প্রয়োজনে অন্য অ্যাকাউন্ট দিয়ে লগইন করতে আগে লগআউট করুন।',true);}}catch{}
+});
+</script>
+</body></html>

@@ -1,0 +1,105 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".validate": "newData.hasChildren(['uid','email','role'])",
+        "uid": {
+          ".validate": "newData.isString() && newData.val() === $uid"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length <= 254"
+        },
+        "role": {
+          ".validate": "newData.isString() && (newData.val() === 'worker' || newData.val() === 'employer' || (data.val() === 'admin' && newData.val() === 'admin'))"
+        },
+        "$other": {
+          ".validate": true
+        }
+      }
+    },
+    "workers": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'employer')",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        "uid": {
+          ".validate": "newData.isString() && newData.val() === $uid"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length <= 254"
+        },
+        "verified": {
+          ".validate": "newData.val() === data.val() || (auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        },
+        "$other": {
+          ".validate": true
+        }
+      }
+    },
+    "employers": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        "uid": {
+          ".validate": "newData.isString() && newData.val() === $uid"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length <= 254"
+        },
+        "$other": {
+          ".validate": true
+        }
+      }
+    },
+    "jobs": {
+      ".indexOn": [
+        "status",
+        "createdAt",
+        "employerUid"
+      ],
+      "$jobId": {
+        ".read": "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || (!data.exists() && newData.child('employerUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'employer') || (data.exists() && data.child('employerUid').val() === auth.uid && newData.child('employerUid').val() === auth.uid))",
+        ".validate": "newData.hasChildren(['employerUid','status','createdAt'])",
+        "employerUid": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "$other": {
+          ".validate": true
+        }
+      }
+    },
+    "applications": {
+      "$jobId": {
+        "$workerUid": {
+          ".read": "auth != null && (auth.uid === $workerUid || root.child('jobs').child($jobId).child('employerUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+          ".write": "auth != null && ((auth.uid === $workerUid && root.child('users').child(auth.uid).child('role').val() === 'worker' && !data.exists()) || root.child('jobs').child($jobId).child('employerUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+          "$other": {
+            ".validate": true
+          }
+        }
+      }
+    },
+    "reviews": {
+      "$reviewId": {
+        ".read": "auth != null",
+        ".write": "auth != null && (!data.exists() && newData.child('reviewerUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        "$other": {
+          ".validate": true
+        }
+      }
+    },
+    "complaints": {
+      "$complaintId": {
+        ".read": "auth != null && (data.child('reporterUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (!data.exists() && newData.child('reporterUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        "$other": {
+          ".validate": true
+        }
+      }
+    }
+  }
+}
