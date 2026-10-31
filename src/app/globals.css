@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-hind), "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-hind), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-tiro), Georgia, serif;
+  --font-latin: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+
+  /* WorkCulvert palette — pine teal, river blue, warm ochre on paper */
+  --color-paper: #f8f6ef;
+  --color-linen: #efe9da;
+  --color-card: #ffffff;
+  --color-line: #e5dfcd;
+  --color-ink: #14231d;
+  --color-mist: #57655e;
+  --color-faint: #8b978f;
+  --color-pine: #0c5b4e;
+  --color-pine-dark: #094438;
+  --color-pine-deep: #062d26;
+  --color-tint: #e2f1ea;
+  --color-mint: #3ed6a5;
+  --color-river: #0f7099;
+  --color-rivertint: #e2eff5;
+  --color-ochre: #f59e0b;
+  --color-ochre-deep: #d97706;
+  --color-ochre-soft: #fceed3;
+  --color-brick: #d95d4e;
+  --color-brick-soft: #fae3e0;
+
+  --animate-marquee: marquee 42s linear infinite;
+  --animate-marquee-rev: marquee-rev 52s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-slow: float 10s ease-in-out infinite;
+  --animate-dashflow: dashflow 1.4s linear infinite;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes marquee-rev {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-13px);
+    }
+  }
+  @keyframes dashflow {
+    to {
+      stroke-dashoffset: -14;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-ochre);
+  color: #241703;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: #cfd3c4;
+  border-radius: 8px;
+  border: 2px solid var(--color-paper);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-faint);
+}
+
+@layer utilities {
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .glass {
+    background: rgba(248, 246, 239, 0.82);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+  }
+
+  .glass-dark {
+    background: rgba(6, 29, 24, 0.72);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .mask-x {
+    mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent
+    );
+  }
+
+  .mask-b-fade {
+    mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+  }
+
+  .dots-bg {
+    background-image: radial-gradient(rgb(20 35 29 / 0.07) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+  }
+
+  .dots-bg-light {
+    background-image: radial-gradient(rgb(255 255 255 / 0.08) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+  }
+
+  .text-stroke-paper {
+    -webkit-text-stroke: 1.5px rgb(248 246 239 / 0.13);
+    color: transparent;
+  }
+
+  .shadow-card {
+    box-shadow:
+      0 1px 2px rgb(20 35 29 / 0.05),
+      0 12px 32px -12px rgb(20 35 29 / 0.12);
+  }
+
+  .shadow-lift {
+    box-shadow:
+      0 2px 4px rgb(20 35 29 / 0.05),
+      0 28px 60px -20px rgb(20 35 29 / 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
