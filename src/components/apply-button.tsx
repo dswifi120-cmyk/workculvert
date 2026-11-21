@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 
 type State = "idle" | "loading" | "done";
 
@@ -19,6 +20,8 @@ export function ApplyButton({
   variant?: "landing" | "dashboard";
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
+  const jt = t.jobs;
   const [state, setState] = useState<State>("idle");
   const [note, setNote] = useState("");
   const [worker, setWorker] = useState<SessionWorker>(null);
@@ -45,18 +48,23 @@ export function ApplyButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId, jobTitle }),
       });
-      const json = (await res.json()) as { ok: boolean; duplicate?: boolean; message?: string; error?: string };
+      const json = (await res.json()) as {
+        ok: boolean;
+        duplicate?: boolean;
+        message?: string;
+        error?: string;
+      };
       if (!res.ok || !json.ok) {
         setState("idle");
-        setNote(json.error ?? "আবার চেষ্টা করুন।");
+        setNote(json.error ?? jt.retryErr);
         setTimeout(() => setNote(""), 3500);
         return;
       }
       setState("done");
-      setNote(json.duplicate ? "আগেই আবেদন করা ছিল" : "আবেদন পাঠানো হয়েছে");
+      setNote(json.duplicate ? jt.duplicateNote : jt.sentNote);
     } catch {
       setState("idle");
-      setNote("নেটওয়ার্ক সমস্যা");
+      setNote(jt.networkErr);
       setTimeout(() => setNote(""), 3500);
     }
   }
@@ -64,8 +72,26 @@ export function ApplyButton({
   if (variant === "dashboard") {
     return (
       <span className="flex flex-col items-end gap-1">
-        <button type="button" onClick={apply} disabled={state !== "idle"} className={cn("rounded-full border-2 px-4 py-2 text-[13px] font-semibold transition-colors", state === "done" ? "border-pine bg-pine text-paper" : "border-pine/25 text-pine hover:border-pine hover:bg-pine hover:text-paper")}>
-          {state === "loading" ? <LoaderCircle size={14} className="animate-spin" /> : state === "done" ? <span className="flex items-center gap-1"><Check size={13} /> পাঠানো হয়েছে</span> : "আবেদন"}
+        <button
+          type="button"
+          onClick={apply}
+          disabled={state !== "idle"}
+          className={cn(
+            "rounded-full border-2 px-4 py-2 text-[13px] font-semibold transition-colors",
+            state === "done"
+              ? "border-pine bg-pine text-paper"
+              : "border-pine/25 text-pine hover:border-pine hover:bg-pine hover:text-paper"
+          )}
+        >
+          {state === "loading" ? (
+            <LoaderCircle size={14} className="animate-spin" />
+          ) : state === "done" ? (
+            <span className="flex items-center gap-1">
+              <Check size={13} /> {jt.appliedBtn}
+            </span>
+          ) : (
+            jt.applyShort
+          )}
         </button>
         {note && <span className="text-[11px] font-medium text-mist">{note}</span>}
       </span>
@@ -74,8 +100,28 @@ export function ApplyButton({
 
   return (
     <span className="flex flex-col items-end gap-1">
-      <button type="button" onClick={apply} disabled={state !== "idle"} className={cn("flex items-center gap-1 rounded-full px-4 py-2 text-[13px] font-semibold transition-colors", state === "done" ? "bg-pine text-paper" : "bg-pine/[0.08] text-pine hover:bg-pine hover:text-paper")}>
-        {state === "loading" ? <LoaderCircle size={14} className="animate-spin" /> : state === "done" ? <><Check size={13} /> পাঠানো হয়েছে</> : <><ArrowRight size={13} /> আবেদন করুন</>}
+      <button
+        type="button"
+        onClick={apply}
+        disabled={state !== "idle"}
+        className={cn(
+          "flex items-center gap-1 rounded-full px-4 py-2 text-[13px] font-semibold transition-colors",
+          state === "done"
+            ? "bg-pine text-paper"
+            : "bg-pine/[0.08] text-pine hover:bg-pine hover:text-paper"
+        )}
+      >
+        {state === "loading" ? (
+          <LoaderCircle size={14} className="animate-spin" />
+        ) : state === "done" ? (
+          <>
+            <Check size={13} /> {jt.appliedBtn}
+          </>
+        ) : (
+          <>
+            <ArrowRight size={13} /> {jt.applyBtn}
+          </>
+        )}
       </button>
       {note && <span className="text-[11px] font-medium text-mist">{note}</span>}
     </span>

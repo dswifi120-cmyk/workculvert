@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { and, eq, gt } from "drizzle-orm";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { adminSessions, workerSessions, workers } from "@/db/schema";
 import { expiresInDays, randomToken } from "@/lib/security";
 
@@ -12,6 +12,7 @@ export const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@workculvert.com";
 export const ADMIN_OTP_CODE = process.env.ADMIN_OTP_CODE ?? "246810";
 
 export async function createWorkerSession(workerId: number) {
+  const db = await getDb();
   const token = randomToken();
   const expiresAt = expiresInDays(21);
   await db.insert(workerSessions).values({ token, workerId, expiresAt });
@@ -29,6 +30,7 @@ export async function clearWorkerSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(WORKER_SESSION_COOKIE)?.value;
   if (token) {
+    const db = await getDb();
     await db.delete(workerSessions).where(eq(workerSessions.token, token));
   }
   cookieStore.delete(WORKER_SESSION_COOKIE);
@@ -38,6 +40,7 @@ export async function getCurrentWorker() {
   const cookieStore = await cookies();
   const token = cookieStore.get(WORKER_SESSION_COOKIE)?.value;
   if (!token) return null;
+  const db = await getDb();
   const rows = await db
     .select({
       id: workers.id,
@@ -59,7 +62,8 @@ export async function getCurrentWorker() {
     .where(
       and(
         eq(workerSessions.token, token),
-        gt(workerSessions.expiresAt, new Date())
+        gt(workerSessions.expiresAt, new Date()),
+        eq(workers.isApproved, true)
       )
     )
     .limit(1);
@@ -73,6 +77,7 @@ export async function requireWorker() {
 }
 
 export async function createAdminSession(email: string) {
+  const db = await getDb();
   const token = randomToken();
   const expiresAt = expiresInDays(7);
   await db.insert(adminSessions).values({ token, email, expiresAt });
@@ -90,6 +95,7 @@ export async function clearAdminSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
   if (token) {
+    const db = await getDb();
     await db.delete(adminSessions).where(eq(adminSessions.token, token));
   }
   cookieStore.delete(ADMIN_SESSION_COOKIE);
@@ -99,6 +105,7 @@ export async function getCurrentAdmin() {
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
   if (!token) return null;
+  const db = await getDb();
   const rows = await db
     .select({ email: adminSessions.email })
     .from(adminSessions)

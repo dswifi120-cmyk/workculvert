@@ -16,11 +16,10 @@ export type AuthState = {
  */
 export function useAuthUser(): AuthState {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isFirebaseConfigured);
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
-      setLoading(false);
       return;
     }
     const unsub = onAuthStateChanged(getFirebaseAuth(), (u) => {

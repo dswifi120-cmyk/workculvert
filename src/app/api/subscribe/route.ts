@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { subscribers } from "@/db/schema";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       );
     }
 
+    const db = await getDb();
     await db.insert(subscribers).values({ email }).onConflictDoNothing();
 
     return NextResponse.json({ ok: true });

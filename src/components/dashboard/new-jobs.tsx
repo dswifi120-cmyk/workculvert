@@ -1,6 +1,6 @@
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { jobs, type Job } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { ArrowRight, Clock, MapPin, Sparkles } from "lucide-react";
 import { ApplyButton } from "@/components/apply-button";
 import { formatNumber, timeAgoBn } from "@/lib/utils";
@@ -8,7 +8,13 @@ import { formatNumber, timeAgoBn } from "@/lib/utils";
 export async function NewJobsList() {
   let list: Job[] = [];
   try {
-    list = await db.select().from(jobs).orderBy(desc(jobs.createdAt)).limit(5);
+    const db = await getDb();
+    list = await db
+      .select()
+      .from(jobs)
+      .where(and(eq(jobs.verifiedByAdmin, true), eq(jobs.status, "verified")))
+      .orderBy(desc(jobs.createdAt))
+      .limit(5);
   } catch {
     list = [];
   }
@@ -32,7 +38,10 @@ export async function NewJobsList() {
           className="group flex items-center gap-1 text-[13px] font-bold text-pine"
         >
           সবগুলো দেখুন
-          <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+          <ArrowRight
+            size={14}
+            className="transition-transform duration-300 group-hover:translate-x-1"
+          />
         </button>
       </div>
 
@@ -65,7 +74,11 @@ export async function NewJobsList() {
             <p className="text-right text-[17px] font-bold text-ink">
               ৳{formatNumber(job.budget)}
             </p>
-            <ApplyButton jobId={job.id} jobTitle={job.title} variant="dashboard" />
+            <ApplyButton
+              jobId={job.id}
+              jobTitle={job.title}
+              variant="dashboard"
+            />
           </li>
         ))}
         {list.length === 0 && (

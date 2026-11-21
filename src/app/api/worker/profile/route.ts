@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { workers } from "@/db/schema";
 import { getCurrentWorker } from "@/lib/auth";
 
@@ -15,6 +15,7 @@ export async function POST(req: Request) {
   const isActive = form.get("isActive") === "on";
   const bio = String(form.get("bio") ?? "").trim();
 
+  const db = await getDb();
   await db
     .update(workers)
     .set({

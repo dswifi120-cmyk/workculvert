@@ -1,28 +1,18 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Hind_Siliguri, Tiro_Bangla, Space_Grotesk } from "next/font/google";
+import "@fontsource/hind-siliguri/300.css";
+import "@fontsource/hind-siliguri/400.css";
+import "@fontsource/hind-siliguri/500.css";
+import "@fontsource/hind-siliguri/600.css";
+import "@fontsource/hind-siliguri/700.css";
+import "@fontsource/tiro-bangla/400.css";
+import "@fontsource/tiro-bangla/400-italic.css";
+import "@fontsource/space-grotesk/400.css";
+import "@fontsource/space-grotesk/500.css";
+import "@fontsource/space-grotesk/700.css";
+import { LanguageProvider } from "@/components/language-provider";
+import { getServerLocale } from "@/lib/server-locale";
 import "./globals.css";
-
-const hind = Hind_Siliguri({
-  subsets: ["bengali", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-hind",
-  display: "swap",
-});
-
-const tiro = Tiro_Bangla({
-  subsets: ["bengali", "latin"],
-  weight: "400",
-  variable: "--font-tiro",
-  display: "swap",
-});
-
-const grotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-grotesk",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://workculvert.com"),
@@ -31,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s · WorkCulvert",
   },
   description:
-    "ইলেকট্রিশিয়ান, প্লাম্বার, ক্লিনার, কেয়ারগিভার — বগুড়ার যাচাইকৃত দক্ষ কর্মীদের সাথে মিনিটেই সংযোগ করুন, অথবা আপনার পছন্দের কাজ খুঁজে নিন।",
+    "ইলেকট্রিশিয়ান, প্লাম্বার, ক্লিনার, কেয়ারগিভার ও পরিবহন — বগুড়ার যাচাইকৃত দক্ষ কর্মীদের সাথে মিনিটেই সংযোগ করুন, অথবা আপনার পছন্দের কাজ খুঁজে নিন।",
   openGraph: {
     title: "WorkCulvert — বগুড়ার কর্মী ও কাজের মার্কেটপ্লেস",
     description:
@@ -40,14 +30,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const initialLocale = await getServerLocale();
+
   return (
-    <html lang="bn">
-      <body
-        className={`${hind.variable} ${tiro.variable} ${grotesk.variable} bg-paper text-ink antialiased`}
-      >
-        <div className="noise" aria-hidden="true" />
-        {children}
+    <html lang={initialLocale}>
+      <body className="bg-paper text-ink antialiased">
+        <LanguageProvider initialLocale={initialLocale}>
+          <div className="noise" aria-hidden="true" />
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

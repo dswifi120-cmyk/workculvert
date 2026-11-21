@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { jobs } from "@/db/schema";
 import { getCurrentWorker } from "@/lib/auth";
 
@@ -15,19 +15,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const response = body?.response === "accepted" ? "accepted" : "declined";
 
     const { id } = await params;
+    const jobId = Number(id);
+    if (!Number.isInteger(jobId) || jobId < 1) {
+      return NextResponse.json({ ok: false, error: "Invalid job ID" }, { status: 400 });
+    }
 
-    // Check if job is actually assigned to this worker
-    const jobRows = await db.select().from(jobs).where(eq(jobs.id, Number(id))).limit(1);
+    const db = await getDb();
+    const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId)).limit(1);
     const job = jobRows[0];
 
     if (!job || job.assignedWorkerId !== worker.id) {
       return NextResponse.json({ ok: false, error: "কাজটি আপনাকে অ্যাসাইন করা হয়নি।" }, { status: 403 });
     }
 
-    await db.update(jobs).set({
-      workerResponse: response,
-      workerResponseAt: new Date()
-    }).where(eq(jobs.id, job.id));
+    await db
+      .update(jobs)
+      .set({
+        workerResponse: response,
+        workerResponseAt: new Date(),
+      })
+      .where(eq(jobs.id, job.id));
 
     return NextResponse.json({ ok: true });
   } catch (err) {

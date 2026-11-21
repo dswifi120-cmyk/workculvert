@@ -1,41 +1,34 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { employers, jobs, legalLogs } from "@/db/schema";
+import { VALID_CATEGORY_VALUES, VALID_JOB_TYPES } from "@/lib/categories";
+import { getServerLocale } from "@/lib/server-locale";
 
 const BN_DIGIT_MAP: Record<string, string> = {
   "০": "0", "১": "1", "২": "2", "৩": "3", "৪": "4",
   "৫": "5", "৬": "6", "৭": "7", "৮": "8", "৯": "9",
 };
 
-function toLatinDigits(s: string) {
+export function toLatinDigits(s: string) {
   return s.replace(/[০-৯]/g, (d) => BN_DIGIT_MAP[d] ?? d);
 }
 
-function cleanPhone(phone: string) {
-  return phone.replace(/[^\d+]/g, "").trim();
+export function cleanPhone(phone: string) {
+  return toLatinDigits(phone).replace(/[^\d+]/g, "").trim();
 }
 
-const VALID_CATEGORIES = [
-  "ইলেকট্রিশিয়ান",
-  "প্লাম্বার",
-  "ক্লিনার",
-  "কেয়ারগিভার",
-  "রংমিস্ত্রি",
-  "কারপেন্টার",
-  "ড্রাইভার",
-  "নিরাপত্তাকর্মী",
-  "এসি মিস্ত্রি",
-  "অন্যান্য",
-];
-
-const VALID_TYPES = ["দৈনিক", "সাপ্তাহিক", "মাসিক", "চুক্তিভিত্তিক"];
-
 export async function POST(req: Request) {
+  const locale = await getServerLocale();
+  const isEn = locale === "en";
+
   try {
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
     if (!body) {
-      return NextResponse.json({ ok: false, error: "সঠিক তথ্য পাঠান।" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: isEn ? "Please submit valid information." : "সঠিক তথ্য পাঠান।" },
+        { status: 400 }
+      );
     }
 
     const employerName = typeof body.employerName === "string" ? body.employerName.trim() : "";
@@ -54,44 +47,86 @@ export async function POST(req: Request) {
         : "";
     const budget = Number(budgetRaw);
 
-    if (employerName.length < 3) {
-      return NextResponse.json({ ok: false, error: "আপনার নাম লিখুন।" }, { status: 400 });
+    if (employerName.length < 2) {
+      return NextResponse.json(
+        { ok: false, error: isEn ? "Please enter your name." : "আপনার নাম লিখুন।" },
+        { status: 400 }
+      );
     }
     if (phone.length < 11 || phone.length > 16) {
-      return NextResponse.json({ ok: false, error: "সঠিক ফোন নম্বর দিন।" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: isEn ? "Please enter a valid phone number." : "সঠিক ফোন নম্বর দিন।" },
+        { status: 400 }
+      );
     }
-    if (title.length < 4 || title.length > 120) {
-      return NextResponse.json({ ok: false, error: "কাজের নাম কমপক্ষে ৪ অক্ষরের হতে হবে।" }, { status: 400 });
+    if (title.length < 4 || title.length > 140) {
+      return NextResponse.json(
+        { ok: false, error: isEn ? "Work title must be at least 4 characters." : "কাজের নাম কমপক্ষে ৪ অক্ষরের হতে হবে।" },
+        { status: 400 }
+      );
     }
-    if (!VALID_CATEGORIES.includes(category)) {
-      return NextResponse.json({ ok: false, error: "সঠিক ক্যাটাগরি বেছে নিন।" }, { status: 400 });
+    if (!VALID_CATEGORY_VALUES.includes(category)) {
+      return NextResponse.json(
+        { ok: false, error: isEn ? "Please choose a valid category." : "সঠিক ক্যাটাগরি বেছে নিন।" },
+        { status: 400 }
+      );
     }
     if (location.length < 2 || location.length > 80) {
-      return NextResponse.json({ ok: false, error: "কাজের সঠিক লোকেশন লিখুন।" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: isEn ? "Please enter a valid work location." : "কাজের সঠিক লোকেশন লিখুন।" },
+        { status: 400 }
+      );
     }
     if (!Number.isFinite(budget) || budget < 100 || budget > 1000000) {
-      return NextResponse.json({ ok: false, error: "বাজেট ৳১০০ থেকে ৳১০,০০,০০০ এর মধ্যে দিন।" }, { status: 400 });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: isEn
+            ? "Budget must be between ৳100 and ৳1,000,000."
+            : "বাজেট ৳১০০ থেকে ৳১০,০০,০০০ এর মধ্যে দিন।",
+        },
+        { status: 400 }
+      );
     }
     if (!termsAccepted) {
-      return NextResponse.json({ ok: false, error: "কাজ পোস্টের আগে Terms, Policy & Conditions accept করতে হবে।" }, { status: 400 });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: isEn
+            ? "You must accept the Terms, Policy & Conditions before posting."
+            : "কাজ পোস্টের আগে Terms, Policy & Conditions accept করতে হবে।",
+        },
+        { status: 400 }
+      );
     }
 
+    const db = await getDb();
     const employerRows = await db.select().from(employers).where(eq(employers.phone, phone)).limit(1);
     const employer = employerRows[0];
     if (!employer?.isPhoneVerified) {
-      return NextResponse.json({ ok: false, error: "কাজ পোস্টের আগে ফোন OTP যাচাই করুন।" }, { status: 403 });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: isEn
+            ? "Please verify your phone OTP before posting."
+            : "কাজ পোস্টের আগে ফোন OTP যাচাই করুন।",
+        },
+        { status: 403 }
+      );
     }
 
-    // IP Address & User Agent collect করা
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "0.0.0.0";
     const userAgent = req.headers.get("user-agent") || "unknown";
 
-    await db.insert(legalLogs).values({
-      userType: "employer",
-      userPhone: phone,
-      ipAddress: ip,
-      userAgent: userAgent,
-    }).catch(e => console.error("Legal log error:", e));
+    await db
+      .insert(legalLogs)
+      .values({
+        userType: "employer",
+        userPhone: phone,
+        ipAddress: ip,
+        userAgent,
+      })
+      .catch((e) => console.error("Legal log error:", e));
 
     await db.insert(jobs).values({
       employerId: employer.id,
@@ -101,7 +136,7 @@ export async function POST(req: Request) {
       description,
       budget: Math.round(budget),
       durationText: durationText || "১ দিন",
-      jobType: VALID_TYPES.includes(jobType) ? jobType : "দৈনিক",
+      jobType: (VALID_JOB_TYPES as readonly string[]).includes(jobType) ? jobType : "দৈনিক",
       urgent,
       postedBy: employerName,
       contactPhone: phone,
@@ -112,10 +147,20 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      message: "কাজ পোস্ট হয়েছে — অ্যাডমিন যাচাইয়ের পর worker-দের কাছে যাবে।",
+      message: isEn
+        ? "Work posted — it will be shared with workers after admin verification."
+        : "কাজ পোস্ট হয়েছে — অ্যাডমিন যাচাইয়ের পর worker-দের কাছে যাবে।",
     });
   } catch (err) {
     console.error("[jobs] POST failed:", err);
-    return NextResponse.json({ ok: false, error: "সার্ভারে সমস্যা হয়েছে। কিছুক্ষণ পর চেষ্টা করুন।" }, { status: 500 });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: isEn
+          ? "Server error. Please try again shortly."
+          : "সার্ভারে সমস্যা হয়েছে। কিছুক্ষণ পর চেষ্টা করুন।",
+      },
+      { status: 500 }
+    );
   }
 }
