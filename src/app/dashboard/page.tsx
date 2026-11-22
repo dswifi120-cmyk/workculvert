@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import {
   ArrowUpRight,
   Briefcase,
@@ -32,6 +32,16 @@ export default async function WorkerDashboardPage() {
   const d = getDictionary(locale).dashboard;
   const db = await getDb();
 
+  let workerSkills: string[] = [worker.category];
+  try {
+    const parsed = JSON.parse(worker.skillsList || "[]");
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      workerSkills = Array.from(new Set([worker.category, ...parsed]));
+    }
+  } catch {
+    workerSkills = [worker.category];
+  }
+
   const assignedJobs = await db
     .select()
     .from(jobs)
@@ -45,7 +55,7 @@ export default async function WorkerDashboardPage() {
     .where(
       and(
         eq(jobs.verifiedByAdmin, true),
-        eq(jobs.category, worker.category),
+        inArray(jobs.category, workerSkills),
         isNull(jobs.assignedWorkerId)
       )
     )
@@ -105,11 +115,17 @@ export default async function WorkerDashboardPage() {
             </div>
 
             <div className="mt-5 space-y-2 text-[14px] text-mist">
-              <p className="flex items-center gap-2">
-                <Briefcase size={15} className="text-pine" />{" "}
-                {translateCategory(worker.category, locale)}
-              </p>
-              <p className="flex items-center gap-2">
+              <div className="flex flex-wrap gap-1.5">
+                {workerSkills.map((sk) => (
+                  <span
+                    key={sk}
+                    className="inline-flex items-center gap-1 rounded-full bg-tint px-2.5 py-0.5 text-[12px] font-semibold text-pine"
+                  >
+                    <Briefcase size={12} /> {translateCategory(sk, locale)}
+                  </span>
+                ))}
+              </div>
+              <p className="flex items-center gap-2 pt-1">
                 <PhoneCall size={15} className="text-pine" /> {worker.phone}
               </p>
               <p className="flex items-center gap-2">
@@ -122,7 +138,11 @@ export default async function WorkerDashboardPage() {
               </p>
               <p className="flex items-center gap-2">
                 <UserCheck size={15} className="text-pine" /> {d.expLabel}{" "}
-                {localizeDigits(worker.experienceYears, locale)} {d.years}
+                {worker.isFresher
+                  ? locale === "en"
+                    ? "Fresher"
+                    : "ফ্রেশার"
+                  : `${localizeDigits(worker.experienceYears, locale)} ${d.years}`}
               </p>
             </div>
 
@@ -138,6 +158,18 @@ export default async function WorkerDashboardPage() {
                 <input
                   name="currentLocation"
                   defaultValue={worker.currentLocation}
+                  placeholder={locale === "en" ? "e.g. Dhaka / Chattogram / Rajshahi" : "যেমন: ঢাকা / চট্টগ্রাম / রাজশাহী"}
+                  className="w-full rounded-xl border border-line bg-paper/60 px-4 py-3 text-[14px] text-ink outline-none focus:border-pine"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-[13px] font-semibold text-ink">
+                  {locale === "en" ? "Preferred Work Areas" : "পছন্দের কাজের এলাকা"}
+                </label>
+                <input
+                  name="preferredAreas"
+                  defaultValue={worker.preferredAreas || worker.currentLocation}
+                  placeholder={locale === "en" ? "Areas where you want to take jobs" : "কোন কোন এলাকায় কাজ নিতে চান"}
                   className="w-full rounded-xl border border-line bg-paper/60 px-4 py-3 text-[14px] text-ink outline-none focus:border-pine"
                 />
               </div>

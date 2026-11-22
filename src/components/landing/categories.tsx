@@ -7,6 +7,7 @@ import {
   Hammer,
   HeartHandshake,
   Paintbrush,
+  PawPrint,
   ShieldCheck,
   Sparkles,
   Wrench,
@@ -20,11 +21,12 @@ const CARD_META = [
   { icon: Wrench, tint: "bg-rivertint text-river" },
   { icon: Sparkles, tint: "bg-tint text-pine" },
   { icon: HeartHandshake, tint: "bg-brick-soft text-brick" },
-  { icon: Paintbrush, tint: "bg-tint text-pine" },
-  { icon: Hammer, tint: "bg-ochre-soft text-ochre-deep" },
+  { icon: PawPrint, tint: "bg-tint text-pine" },
   { icon: Car, tint: "bg-rivertint text-river" },
-  { icon: ShieldCheck, tint: "bg-tint text-pine" },
+  { icon: Hammer, tint: "bg-ochre-soft text-ochre-deep" },
+  { icon: Paintbrush, tint: "bg-tint text-pine" },
   { icon: AirVent, tint: "bg-rivertint text-river" },
+  { icon: ShieldCheck, tint: "bg-tint text-pine" },
 ];
 
 export function Categories() {

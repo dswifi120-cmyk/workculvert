@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { HardHat, Mail, MapPin, PhoneCall } from "lucide-react";
+import { Download, Mail, MapPin, PhoneCall } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { useLanguage } from "@/components/language-provider";
 
 export function Footer() {
@@ -13,13 +14,8 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
         <div className="grid gap-12 lg:grid-cols-[1.3fr_2fr]">
           <div>
-            <Link href="/" className="flex items-center gap-2.5">
-              <span className="grid size-9 place-items-center rounded-xl bg-pine text-paper">
-                <HardHat size={18} strokeWidth={2.2} />
-              </span>
-              <span className="font-latin text-lg font-bold tracking-[-0.02em] text-ink">
-                Work<span className="text-pine">Culvert</span>
-              </span>
+            <Link href="/" className="inline-block">
+              <BrandLogo size="md" subtitle={t.meta.brandLocation} />
             </Link>
             <p className="mt-5 max-w-xs text-[14px] leading-[1.8] text-mist">
               {f.tagline}
@@ -33,6 +29,16 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail size={15} className="text-pine" /> hello@workculvert.com
+              </li>
+              <li className="pt-1">
+                <a
+                  href="/brand/wc-logo-banner.svg"
+                  download="WorkCulvert-Official-Brand-Logo.svg"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-3 py-1.5 text-[12px] font-semibold text-pine transition-colors hover:border-pine"
+                >
+                  <Download size={13} />
+                  {t.meta.brandKitLabel}
+                </a>
               </li>
             </ul>
           </div>

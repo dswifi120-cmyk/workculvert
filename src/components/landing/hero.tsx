@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   Bell,
   ChevronRight,
+  Download,
   MapPin,
   Sparkles,
   SquarePen,
@@ -15,6 +16,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
+import { usePwaInstall } from "@/components/pwa-provider";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -153,8 +155,9 @@ function HeroVisual() {
 }
 
 export function Hero() {
-  const { t } = useLanguage();
+  const { locale, t } = useLanguage();
   const h = t.hero;
+  const { isStandalone, triggerInstall } = usePwaInstall();
   const bulletIcons = [BadgeCheck, Timer, Wallet];
 
   return (
@@ -226,6 +229,55 @@ export function Hero() {
             {h.copy}
           </motion.p>
 
+          {/* Upfront Clear Guidance Callout: Post Any Legal Work / Describe Need / Pick Category */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.72, ease: EASE }}
+            className="mt-5 max-w-xl rounded-2xl border border-pine/20 bg-card/85 p-3.5 shadow-sm backdrop-blur-sm sm:p-4"
+          >
+            <p className="text-[13.5px] font-semibold leading-relaxed text-ink">
+              <span className="mr-1.5 inline-block rounded-full bg-tint px-2 py-0.5 text-[11px] font-bold text-pine">
+                {locale === "en" ? "Any Legal Work" : "যেকোনো বৈধ কাজ"}
+              </span>
+              {locale === "en"
+                ? "Post any legitimate task near your location — simply describe your need in work details or pick a category below. Quick OTP verification keeps fake posts out!"
+                : "আপনার আশেপাশের এলাকায় যেকোনো বৈধ কাজ পোস্ট করতে পারবেন — কাজের বিবরণে আপনার প্রয়োজন খুলে বলুন অথবা পছন্দের ক্যাটাগরি বেছে নিন (ভুয়া পোস্ট রোধে শুধু ফোন OTP যাচাই)।"}
+            </p>
+            <div className="mt-2.5 flex flex-wrap gap-1.5 text-[11.5px] font-bold">
+              <Link
+                href="/work/any-work#post-form"
+                className="rounded-full border border-pine/25 bg-tint/70 px-2.5 py-1 text-pine transition-colors hover:bg-pine hover:text-paper"
+              >
+                {locale === "en" ? "✦ Custom / Any Work" : "✦ যেকোনো কাজ লিখুন"}
+              </Link>
+              <Link
+                href="/work/transportation#post-form"
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-ink transition-colors hover:border-pine/40"
+              >
+                {locale === "en" ? "🛵 Ride & Parcel" : "🛵 রাইড ও পার্সেল"}
+              </Link>
+              <Link
+                href="/work/skilled#post-form"
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-ink transition-colors hover:border-pine/40"
+              >
+                {locale === "en" ? "🔧 Skilled Technician" : "🔧 দক্ষ কারিগর"}
+              </Link>
+              <Link
+                href="/work/caregiver#post-form"
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-ink transition-colors hover:border-pine/40"
+              >
+                {locale === "en" ? "🩺 Caregiver" : "🩺 কেয়ারগিভার"}
+              </Link>
+              <Link
+                href="/work/pet-caretaker#post-form"
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-ink transition-colors hover:border-pine/40"
+              >
+                {locale === "en" ? "🐾 Pet Care" : "🐾 পেট কেয়ার"}
+              </Link>
+            </div>
+          </motion.div>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -249,6 +301,16 @@ export function Hero() {
               <SquarePen size={17} className="text-ochre-deep" />
               {h.postJobCta}
             </a>
+            {!isStandalone && (
+              <button
+                type="button"
+                onClick={() => void triggerInstall()}
+                className="group inline-flex items-center justify-center gap-2 rounded-full border border-ochre/45 bg-ochre-soft/75 px-5 py-4 text-[14.5px] font-bold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-ochre hover:text-ink"
+              >
+                <Download size={16} className="text-ochre-deep group-hover:text-ink" />
+                {locale === "en" ? "Install App" : "অ্যাপ ইনস্টল"}
+              </button>
+            )}
           </motion.div>
 
           <motion.ul

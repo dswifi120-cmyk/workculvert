@@ -37,8 +37,8 @@ export function JobCard({ job }: { job: Job }) {
       </h3>
       <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-mist">
         <span className="flex items-center gap-1">
-          <MapPin size={13} className="text-river" /> {job.location},{" "}
-          {jt.citySuffix}
+          <MapPin size={13} className="text-river" /> {job.location}
+          {jt.citySuffix ? `, ${jt.citySuffix}` : ""}
         </span>
         <span className="rounded-full bg-paper px-2 py-0.5 text-[12px] font-medium text-mist">
           {translateJobType(job.jobType, locale)}

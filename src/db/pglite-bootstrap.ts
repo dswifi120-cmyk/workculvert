@@ -40,9 +40,18 @@ CREATE TABLE IF NOT EXISTS workers (
   phone TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   category TEXT NOT NULL,
+  skills_list TEXT NOT NULL DEFAULT '[]',
+  is_fresher BOOLEAN NOT NULL DEFAULT false,
   experience_years INTEGER NOT NULL DEFAULT 0,
   base_location TEXT NOT NULL,
   current_location TEXT NOT NULL,
+  preferred_areas TEXT NOT NULL DEFAULT '',
+  permanent_address TEXT NOT NULL DEFAULT '',
+  present_address TEXT NOT NULL DEFAULT '',
+  nid_number TEXT NOT NULL DEFAULT '',
+  nid_name_match BOOLEAN NOT NULL DEFAULT false,
+  nid_front_image TEXT NOT NULL DEFAULT '',
+  nid_back_image TEXT NOT NULL DEFAULT '',
   bio TEXT NOT NULL DEFAULT '',
   is_approved BOOLEAN NOT NULL DEFAULT false,
   is_active BOOLEAN NOT NULL DEFAULT false,
@@ -50,6 +59,16 @@ CREATE TABLE IF NOT EXISTS workers (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   approved_at TIMESTAMPTZ
 );
+
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS skills_list TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS is_fresher BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS preferred_areas TEXT NOT NULL DEFAULT '';
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS permanent_address TEXT NOT NULL DEFAULT '';
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS present_address TEXT NOT NULL DEFAULT '';
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS nid_number TEXT NOT NULL DEFAULT '';
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS nid_name_match BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS nid_front_image TEXT NOT NULL DEFAULT '';
+ALTER TABLE workers ADD COLUMN IF NOT EXISTS nid_back_image TEXT NOT NULL DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS worker_sessions (
   token TEXT PRIMARY KEY,
@@ -113,8 +132,8 @@ CREATE TABLE IF NOT EXISTS applications (
 const SEED_SQL = `
 INSERT INTO employers (full_name, phone, location, is_phone_verified)
 VALUES
-  ('শারমিন আক্তার', '01710000000', 'সাতমাথা, বগুড়া', true),
-  ('তানভীর হাসান', '01710000001', 'শেরপুর রোড, বগুড়া', true)
+  ('শারমিন আক্তার', '01710000000', 'ধানমন্ডি, ঢাকা', true),
+  ('তানভীর হাসান', '01710000001', 'সাতমাথা, বগুড়া', true)
 ON CONFLICT (phone) DO NOTHING;
 
 INSERT INTO jobs (
@@ -123,16 +142,23 @@ INSERT INTO jobs (
 )
 SELECT * FROM (
   VALUES
-    (1, 'কিচেন সিংক পাইপ লিকেজ মেরামত', 'প্লাম্বার', 'সাতমাথা', 'পাইপ থেকে পানি পড়ছে, আজকের মধ্যে মেরামত দরকার।', 1800, '৪ ঘণ্টা', 'দৈনিক', true, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '25 minutes'),
-    (2, 'বাসার পুরো ওয়্যারিং পরিবর্তন', 'ইলেকট্রিশিয়ান', 'শেরপুর রোড', 'পুরনো wiring change ও distribution board check করতে হবে।', 8500, '২ দিন', 'চুক্তিভিত্তিক', false, 'তানভীর হাসান', '01710000001', true, 'verified', true, now() - interval '2 hours'),
-    (1, '৩ বেডরুম ফ্ল্যাট ডিপ ক্লিনিং টিম', 'ক্লিনার টিম', 'মালতিনগর', 'বাসা পুরো deep clean করার জন্য ৩ জনের টিম দরকার।', 3500, '১ দিন', 'দৈনিক', false, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '4 hours'),
-    (2, 'শহীদ জিয়াউর রহমান মেডিকেলে রোগীর দেখাশোনা', 'হাসপাতালে রোগীর দেখাশোনা', 'ছিলিমপুর', 'রাত ৮টা থেকে সকাল ৮টা শিফটে রোগীর পাশে থেকে দেখাশোনা লাগবে।', 1200, '১ রাত', 'দৈনিক', true, 'তানভীর হাসান', '01710000001', true, 'verified', true, now() - interval '5 hours'),
-    (1, 'বাসা বদলের জন্য ১ টন ট্রাক/পিকআপ', 'Truck', 'জলেশ্বরীতলা', 'জলেশ্বরীতলা থেকে উপশহর পর্যন্ত আসবাবপত্র শিফটিং।', 2800, '৪ ঘণ্টা', 'চুক্তিভিত্তিক', false, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '7 hours'),
-    (2, 'বয়স্ক মায়ের বাসায় দৈনিক যত্নে সহায়ক', 'বাসায় রোগীর দেখাশোনা', 'নামুজা', 'সকাল ৮টা থেকে বিকাল ৫টা পর্যন্ত বাসায় care support লাগবে।', 15000, '১ মাস', 'মাসিক', false, 'তানভীর হাসান', '01710000001', true, 'verified', true, now() - interval '12 hours'),
-    (1, 'জরুরি অফিস ডকুমেন্ট ডেলিভারি (বাইক)', 'Bike', 'সাতমাথা', 'সাতমাথা থেকে শেরপুর রোড অফিসে পার্সেল পৌঁছে দিতে হবে।', 350, '২ ঘণ্টা', 'চুক্তিভিত্তিক', true, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '1 day'),
-    (2, 'অফিস ইভেন্টে চেয়ার ও ডেকোরেশন গোছানোর সহায়ক', 'যেকোনো কাজ (Any Work)', 'মাজহিরা', '১ দিনের অফিস প্রোগ্রামে সেটআপ ও গোছগাছের কাজ।', 900, '১ দিন', 'দৈনিক', false, 'তানভীর হাসান', '01710000001', true, 'verified', true, now() - interval '2 days')
+    (1, 'কিচেন সিংক পাইপ লিকেজ মেরামত', 'প্লাম্বার', 'ধানমন্ডি, ঢাকা', 'পাইপ থেকে পানি পড়ছে, আজকের মধ্যে মেরামত দরকার।', 1200, '৩ ঘণ্টা', 'দৈনিক', true, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '25 minutes'),
+    (2, 'বাসার বৈদ্যুতিক সুইচবোর্ড ও ফ্যান মেরামত', 'ইলেকট্রিশিয়ান', 'সাতমাথা, বগুড়া', 'দুই রুমের সুইচবোর্ড ও ডিস্ট্রিবিউশন লাইন চেক করতে হবে।', 1500, '৪ ঘণ্টা', 'চুক্তিভিত্তিক', false, 'তানভীর হাসান', '01710000001', true, 'verified', true, now() - interval '2 hours'),
+    (1, '৩ বেডরুম ফ্ল্যাট ডিপ ক্লিনিং টিম', 'ক্লিনার টিম', 'উত্তরা, ঢাকা', 'বাসা পুরো deep clean করার জন্য ৩ জনের টিম দরকার।', 3200, '১ দিন', 'দৈনিক', false, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '4 hours'),
+    (2, 'হাসপাতালে নাইট শিফট রোগীর অ্যাটেনডেন্ট', 'হাসপাতালে রোগীর দেখাশোনা', 'নাসিরাবাদ, চট্টগ্রাম', 'রাত ৮টা থেকে সকাল ৮টা শিফটে রোগীর পাশে থেকে দেখাশোনা লাগবে।', 1100, '১ রাত', 'দৈনিক', true, 'তানভীর হাসান', '01710000001', true, 'verified', true, now() - interval '5 hours'),
+    (1, 'বাসা বদলের জন্য ১ টন পিকআপ / ট্রাক', 'Truck', 'মিরপুর ১০, ঢাকা', 'মিরপুর থেকে বসুন্ধরা আবাসিক পর্যন্ত আসবাবপত্র শিফটিং।', 2800, '৪ ঘণ্টা', 'চুক্তিভিত্তিক', false, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '7 hours'),
+    (2, 'বয়স্ক মায়ের বাসায় দৈনিক যত্নে সহায়ক', 'বাসায় রোগীর দেখাশোনা', 'উপশহর, রাজশাহী', 'সকাল ৮টা থেকে বিকাল ৫টা পর্যন্ত বাসায় care support লাগবে।', 12000, '১ মাস', 'মাসিক', false, 'তানভীর হাসান', '01710000001', true, 'verified', true, now() - interval '12 hours'),
+    (1, 'জরুরি অফিস ডকুমেন্ট ডেলিভারি (বাইক)', 'পার্সেল ও কুরিয়ার ডেলিভারি (Parcel Delivery)', 'গুলশান ১, ঢাকা', 'গুলশান থেকে মতিঝিল অফিসে জরুরি ফাইল পৌঁছে দিতে হবে।', 280, '২ ঘণ্টা', 'চুক্তিভিত্তিক', true, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '1 day'),
+    (2, 'পারিবারিক অনুষ্ঠানে চেয়ার ও ডেকোরেশন গোছানোর সহায়ক', 'যেকোনো কাজ (Any Work)', 'জিন্দাবাজার, সিলেট', '১ দিনের প্রোগ্রামে সেটআপ ও গোছগাছের কাজ (ফ্রেশাররাও করতে পারবেন)।', 800, '১ দিন', 'দৈনিক', false, 'তানভীর হাসান', '01710000001', true, 'verified', true, now() - interval '2 days')
 ) AS v(employer_id, title, category, location, description, budget, duration_text, job_type, urgent, posted_by, contact_phone, otp_verified, status, verified_by_admin, created_at)
 WHERE NOT EXISTS (SELECT 1 FROM jobs LIMIT 1);
+
+INSERT INTO jobs (
+  employer_id, title, category, location, description, budget, duration_text,
+  job_type, urgent, posted_by, contact_phone, otp_verified, status, verified_by_admin, created_at
+)
+SELECT 1, 'পার্শিয়ান বিড়ালের ২ দিনের হোম সিটিং ও খাবার দেওয়া', 'পেট সিটিং ও হোম কেয়ার (Pet Sitting)', 'বনানী, ঢাকা', 'বাইরে যাওয়ার কারণে ২ দিন সকাল-বিকাল এসে বিড়ালের খাবার ও লিটার পরিষ্কার করতে হবে।', 1200, '২ দিন', 'চুক্তিভিত্তিক', false, 'শারমিন আক্তার', '01710000000', true, 'verified', true, now() - interval '3 hours'
+WHERE NOT EXISTS (SELECT 1 FROM jobs WHERE category = 'পেট সিটিং ও হোম কেয়ার (Pet Sitting)');
 `;
 
 type GlobalPglite = typeof globalThis & {

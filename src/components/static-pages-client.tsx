@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
   CheckCircle2,
+  Download,
   FileCheck2,
   HardHat,
   Mail,
@@ -122,7 +124,8 @@ export function HowWeWorkContent() {
 }
 
 export function WhoWeAreContent() {
-  const { t } = useLanguage();
+  const { locale, t } = useLanguage();
+  const isEn = locale === "en";
   const ww = t.pages.whoWeAre;
   const wp = t.pages.workPage;
 
@@ -161,6 +164,57 @@ export function WhoWeAreContent() {
             <p className="mt-3 text-[15.5px] leading-[1.85] text-mist">
               {ww.aboutBody}
             </p>
+
+            {/* Official WC Brand Kit for Banners, Festoons & Trade Dress */}
+            <div className="mt-6 rounded-2xl border border-line bg-paper/75 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.1em] text-pine">
+                    {isEn
+                      ? "Official WC Corporate Trademark & Print Kit"
+                      : "অফিশিয়াল WC কর্পোরেট লোগো ও ব্যানার/ফেস্টুন কিট"}
+                  </p>
+                  <p className="mt-1 text-[13.5px] text-mist">
+                    {isEn
+                      ? "Ready-to-print vector SVG & high-res PNG assets for company banners, festoons, ID cards, and trademark filing."
+                      : "কোম্পানির ব্যানার, ফেস্টুন, আইডি কার্ড এবং ট্রেডমার্ক রেজিস্ট্রেশনে ব্যবহারের জন্য ভেক্টর SVG ও হাই-রেজোলিউশন PNG লোগো।"}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="/brand/wc-logo-mark.svg"
+                    download="WC-Emblem-Mark.svg"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-pine/30 bg-card px-3.5 py-2 text-xs font-bold text-pine hover:bg-tint"
+                  >
+                    <Download size={13} /> WC Icon (SVG)
+                  </a>
+                  <a
+                    href="/brand/wc-logo-banner.svg"
+                    download="WorkCulvert-Banner-Logo.svg"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-pine px-4 py-2 text-xs font-bold text-paper hover:bg-pine-dark"
+                  >
+                    <Download size={13} />{" "}
+                    {isEn ? "Banner Lockup (SVG)" : "ব্যানার লোগো (SVG)"}
+                  </a>
+                  <a
+                    href="/brand/wc-logo-banner.png"
+                    download="WorkCulvert-Banner-2400px.png"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-2 text-xs font-bold text-ink hover:border-pine"
+                  >
+                    <Download size={13} /> HD PNG
+                  </a>
+                </div>
+              </div>
+              <div className="mt-4 overflow-hidden rounded-xl border border-line bg-white p-4">
+                <Image
+                  src="/brand/wc-logo-banner.png"
+                  alt="WorkCulvert Official WC Banner Logo"
+                  width={900}
+                  height={270}
+                  className="mx-auto h-auto max-h-28 w-auto object-contain"
+                />
+              </div>
+            </div>
           </div>
 
           {/* License & Legal */}

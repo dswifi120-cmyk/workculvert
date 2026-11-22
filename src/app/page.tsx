@@ -2,10 +2,12 @@ import { Nav } from "@/components/landing/nav";
 import { Hero } from "@/components/landing/hero";
 import { Ticker } from "@/components/landing/ticker";
 import { Stats } from "@/components/landing/stats";
+import { CommercialShowcase } from "@/components/landing/commercial-showcase";
 import { Categories } from "@/components/landing/categories";
 import { How } from "@/components/landing/how";
 import { JobsSection } from "@/components/landing/jobs";
 import { Why } from "@/components/landing/why";
+import { PwaPromo } from "@/components/landing/pwa-promo";
 import { Testimonials } from "@/components/landing/testimonials";
 import { FAQ } from "@/components/landing/faq";
 import { CTA } from "@/components/landing/cta";
@@ -18,10 +20,12 @@ export default function LandingPage() {
       <Hero />
       <Ticker />
       <Stats />
+      <CommercialShowcase />
       <Categories />
       <How />
       <JobsSection />
       <Why />
+      <PwaPromo />
       <Testimonials />
       <FAQ />
       <CTA />

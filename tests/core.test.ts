@@ -44,18 +44,27 @@ describe("locale & formatting utilities", () => {
 });
 
 describe("category tabs & bilingual dictionary", () => {
-  it("defines all four navigation tabs", () => {
+  it("defines all five navigation tabs including pet-caretaker", () => {
     expect(CATEGORY_TABS.map((t) => t.slug)).toEqual([
       "any-work",
       "transportation",
       "skilled",
       "caregiver",
+      "pet-caretaker",
     ]);
   });
 
   it("includes required subcategories per tab", () => {
     const transport = getCategoriesForTab("transportation").map((c) => c.value);
-    expect(transport).toEqual(expect.arrayContaining(["Bike", "CNG", "Truck", "Van"]));
+    expect(transport).toEqual(
+      expect.arrayContaining([
+        "Bike",
+        "পার্সেল ও কুরিয়ার ডেলিভারি (Parcel Delivery)",
+        "CNG",
+        "Truck",
+        "Van",
+      ])
+    );
 
     const skilled = getCategoriesForTab("skilled").map((c) => c.value);
     expect(skilled).toEqual(
@@ -67,8 +76,20 @@ describe("category tabs & bilingual dictionary", () => {
       expect.arrayContaining(["হাসপাতালে রোগীর দেখাশোনা", "বাসায় রোগীর দেখাশোনা"])
     );
 
+    const petCaretaker = getCategoriesForTab("pet-caretaker").map((c) => c.value);
+    expect(petCaretaker).toEqual(
+      expect.arrayContaining([
+        "পেট সিটিং ও হোম কেয়ার (Pet Sitting)",
+        "ডগ ওয়াকিং ও ব্যায়াম (Dog Walking)",
+      ])
+    );
+
+    const anyWork = getCategoriesForTab("any-work").map((c) => c.value);
+    expect(anyWork).toContain("নতুন কর্মী / ফ্রেশার (Fresher)");
+
     for (const tab of CATEGORY_TABS) {
       expect(VALID_CATEGORY_VALUES).toContain(tab.defaultCategory);
+      expect(tab.heroImage).toMatch(/^\/images\//);
     }
   });
 
