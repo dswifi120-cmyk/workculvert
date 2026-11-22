@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   Bell,
   ChevronRight,
+  Download,
   MapPin,
   Sparkles,
   SquarePen,
@@ -14,6 +15,8 @@ import {
   Wallet,
   Wrench,
 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
+import { usePwaInstall } from "@/components/pwa-provider";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -27,12 +30,15 @@ const word: Variants = {
 };
 
 function HeroVisual() {
+  const { t } = useLanguage();
+  const v = t.hero.visual;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 1.1, delay: 0.7, ease: EASE }}
-      className="relative mx-auto mt-14 h-[540px] w-full max-w-md lg:mt-0 lg:h-[560px]"
+      className="relative mx-auto mt-12 h-[480px] w-full max-w-md sm:h-[540px] lg:mt-0 lg:h-[560px]"
     >
       {/* glow blobs */}
       <div className="absolute -right-10 top-6 h-64 w-64 rounded-full bg-tint blur-[80px]" />
@@ -42,30 +48,32 @@ function HeroVisual() {
       <motion.div
         animate={{ y: [0, -12, 0] }}
         transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-        className="shadow-lift absolute left-0 top-4 w-[290px] rotate-[-3deg] rounded-3xl border border-line bg-card p-5"
+        className="shadow-lift absolute left-0 top-4 w-[270px] rotate-[-3deg] rounded-3xl border border-line bg-card p-4 sm:w-[290px] sm:p-5"
       >
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-brick-soft px-2.5 py-1 text-[11px] font-semibold text-brick">
-            <span className="size-1.5 rounded-full bg-brick" /> জরুরি
+            <span className="size-1.5 rounded-full bg-brick" /> {v.urgent}
           </span>
-          <span className="text-[11px] text-faint">২০ মিনিট আগে</span>
+          <span className="text-[11px] text-faint">{v.ago20m}</span>
         </div>
-        <p className="mt-3.5 text-[17px] font-semibold leading-snug text-ink">
-          কিচেন সিংক পাইপ লিকেজ মেরামত
+        <p className="mt-3.5 text-[16px] font-semibold leading-snug text-ink sm:text-[17px]">
+          {v.sampleJobTitle}
         </p>
-        <p className="mt-2 flex items-center gap-1.5 text-[13px] text-mist">
-          <MapPin size={13} className="text-river" /> সাতমাথা, বগুড়া
+        <p className="mt-2 flex flex-wrap items-center gap-1.5 text-[13px] text-mist">
+          <MapPin size={13} className="text-river" /> {v.sampleLocation}
           <span className="rounded-full bg-tint px-2 py-0.5 text-[11px] font-medium text-pine">
-            প্লাম্বার
+            {v.sampleCat}
           </span>
         </p>
         <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
           <p className="font-latin text-xl font-bold text-ink">
-            ৳১,৮০০
-            <span className="ml-1 text-[11px] font-normal text-faint">ফিক্সড</span>
+            {v.sampleBudget}
+            <span className="ml-1 text-[11px] font-normal text-faint">
+              {v.fixed}
+            </span>
           </p>
           <span className="rounded-full bg-pine px-3.5 py-2 text-[12px] font-semibold text-paper">
-            আবেদন করুন
+            {v.apply}
           </span>
         </div>
       </motion.div>
@@ -74,20 +82,20 @@ function HeroVisual() {
       <motion.div
         animate={{ y: [0, -14, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
-        className="shadow-lift absolute bottom-16 right-0 w-[290px] rotate-[2.5deg] rounded-3xl border border-line bg-card p-5"
+        className="shadow-lift absolute bottom-8 right-0 w-[270px] rotate-[2.5deg] rounded-3xl border border-line bg-card p-4 sm:bottom-16 sm:w-[290px] sm:p-5"
       >
         <div className="flex items-center gap-3.5">
           <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pine to-river text-lg font-bold text-paper">
-            রউ
+            {v.workerInitials}
           </span>
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 truncate text-[16px] font-semibold text-ink">
-              রহিম উদ্দিন
+              {v.workerName}
               <BadgeCheck size={16} className="shrink-0 text-river" />
             </p>
             <p className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-mist">
               <Wrench size={12} className="text-ochre-deep" />
-              ইলেকট্রিশিয়ান · ৮ বছর
+              {v.workerRole}
             </p>
           </div>
         </div>
@@ -97,8 +105,8 @@ function HeroVisual() {
               <Star key={i} size={13} className="fill-ochre text-ochre" />
             ))}
           </span>
-          <span className="text-[13px] font-semibold text-ink">৪.৯</span>
-          <span className="text-[12px] text-faint">(১২৪ রিভিউ)</span>
+          <span className="text-[13px] font-semibold text-ink">{v.rating}</span>
+          <span className="text-[12px] text-faint">{v.reviews}</span>
         </div>
         <div className="mt-3 flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-pine">
@@ -106,10 +114,10 @@ function HeroVisual() {
               <span className="absolute h-full w-full animate-ping rounded-full bg-pine opacity-50" />
               <span className="relative size-2 rounded-full bg-pine" />
             </span>
-            এখন ফ্রি
+            {v.availableNow}
           </span>
           <span className="text-[13px] font-semibold text-river">
-            প্রোফাইল দেখুন →
+            {v.viewProfile}
           </span>
         </div>
       </motion.div>
@@ -118,15 +126,15 @@ function HeroVisual() {
       <motion.div
         animate={{ y: [0, -10, 0] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
-        className="shadow-card absolute left-6 top-[300px] w-[230px] rounded-2xl border border-line bg-card/95 p-3.5 backdrop-blur sm:left-10 lg:top-[310px]"
+        className="shadow-card absolute left-3 top-[255px] w-[225px] rounded-2xl border border-line bg-card/95 p-3.5 backdrop-blur sm:left-10 sm:top-[300px] lg:top-[310px]"
       >
         <div className="flex items-center gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-ochre-soft text-ochre-deep">
             <Bell size={16} />
           </span>
           <div>
-            <p className="text-[13px] font-semibold text-ink">নতুন আবেদন এসেছে!</p>
-            <p className="text-[11.5px] text-faint">কিচেন সিংক মেরামত · ২ মিনিট আগে</p>
+            <p className="text-[13px] font-semibold text-ink">{v.notifTitle}</p>
+            <p className="text-[11.5px] text-faint">{v.notifSub}</p>
           </div>
         </div>
       </motion.div>
@@ -135,20 +143,25 @@ function HeroVisual() {
       <motion.div
         animate={{ y: [0, -9, 0] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="shadow-card absolute right-2 top-[120px] rounded-2xl border border-line bg-pine px-4 py-3 text-paper"
+        className="shadow-card absolute right-2 top-[115px] rounded-2xl border border-line bg-pine px-4 py-3 text-paper"
       >
         <p className="flex items-center gap-1.5 text-[11px] text-paper/70">
-          <Sparkles size={11} className="text-mint" /> স্কিল ম্যাচ
+          <Sparkles size={11} className="text-mint" /> {v.skillMatch}
         </p>
-        <p className="font-latin text-xl font-bold text-mint">৯৮%</p>
+        <p className="font-latin text-xl font-bold text-mint">{v.skillMatchVal}</p>
       </motion.div>
     </motion.div>
   );
 }
 
 export function Hero() {
+  const { locale, t } = useLanguage();
+  const h = t.hero;
+  const { isStandalone, triggerInstall } = usePwaInstall();
+  const bulletIcons = [BadgeCheck, Timer, Wallet];
+
   return (
-    <section className="relative overflow-hidden pb-16 pt-36 sm:pt-44 lg:pb-24">
+    <section className="relative overflow-hidden pb-16 pt-40 sm:pt-44 lg:pb-24">
       <div className="dots-bg absolute inset-0 [mask-image:radial-gradient(ellipse_80%_65%_at_50%_0%,black,transparent)]" />
       <div className="absolute -top-32 right-[-10%] h-[420px] w-[520px] rounded-full bg-tint/70 blur-[100px]" />
       <div className="absolute left-[-8%] top-40 h-[360px] w-[360px] rounded-full bg-ochre-soft/80 blur-[100px]" />
@@ -163,30 +176,29 @@ export function Hero() {
             <span className="inline-flex items-center gap-2 rounded-full border border-pine/20 bg-card/80 py-1.5 pl-2 pr-4 text-[13px] font-medium text-pine shadow-card">
               <span className="flex items-center gap-1 rounded-full bg-pine px-2.5 py-0.5 text-[11px] font-semibold text-paper">
                 <span className="size-1.5 animate-pulse rounded-full bg-mint" />
-                লাইভ
+                {h.badgeLive}
               </span>
-              বগুড়াকেন্দ্রিক কর্মী ও কাজের মার্কেটপ্লেস
+              {h.badgeText}
             </span>
           </motion.div>
 
           <motion.h1
+            key={h.line1}
             variants={wordContainer}
             initial="hidden"
             animate="show"
-            className="mt-7 text-[clamp(2.3rem,6.2vw,4.4rem)] font-bold leading-[1.18] tracking-[-0.01em] text-ink"
+            className="mt-7 text-[clamp(2.2rem,6vw,4.3rem)] font-bold leading-[1.18] tracking-[-0.01em] text-ink"
           >
-            {["কাজ খুঁজছেন?"].map((line) => (
-              <span key={line} className="-mb-2 block overflow-hidden pb-2">
-                <motion.span variants={word} className="block">
-                  {line}
-                </motion.span>
-              </span>
-            ))}
             <span className="-mb-2 block overflow-hidden pb-2">
               <motion.span variants={word} className="block">
-                নাকি{" "}
+                {h.line1}
+              </motion.span>
+            </span>
+            <span className="-mb-2 block overflow-hidden pb-2">
+              <motion.span variants={word} className="block">
+                {h.line2Prefix}{" "}
                 <span className="relative inline-block font-serif text-[1.08em] leading-none text-pine">
-                  কর্মী
+                  {h.line2Highlight}
                   <svg
                     viewBox="0 0 120 14"
                     className="absolute -bottom-1.5 left-0 w-full"
@@ -203,7 +215,7 @@ export function Hero() {
                     />
                   </svg>
                 </span>{" "}
-                খুঁজছেন?
+                {h.line2Suffix}
               </motion.span>
             </span>
           </motion.h1>
@@ -214,10 +226,57 @@ export function Hero() {
             transition={{ duration: 0.85, delay: 0.65, ease: EASE }}
             className="mt-6 max-w-xl text-[15.5px] leading-[1.85] text-mist sm:text-[17px]"
           >
-            ইলেকট্রিশিয়ান, প্লাম্বার, ক্লিনার থেকে কেয়ারগিভার — বগুড়ার
-            যাচাইকৃত দক্ষ কর্মীদের সাথে মিনিটেই সংযোগ করুন, অথবা আপনার দক্ষতা
-            অনুযায়ী পছন্দের কাজ খুঁজে নিন।
+            {h.copy}
           </motion.p>
+
+          {/* Upfront Clear Guidance Callout: Post Any Legal Work / Describe Need / Pick Category */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.72, ease: EASE }}
+            className="mt-5 max-w-xl rounded-2xl border border-pine/20 bg-card/85 p-3.5 shadow-sm backdrop-blur-sm sm:p-4"
+          >
+            <p className="text-[13.5px] font-semibold leading-relaxed text-ink">
+              <span className="mr-1.5 inline-block rounded-full bg-tint px-2 py-0.5 text-[11px] font-bold text-pine">
+                {locale === "en" ? "Any Legal Work" : "যেকোনো বৈধ কাজ"}
+              </span>
+              {locale === "en"
+                ? "Post any legitimate task near your location — simply describe your need in work details or pick a category below. Quick OTP verification keeps fake posts out!"
+                : "আপনার আশেপাশের এলাকায় যেকোনো বৈধ কাজ পোস্ট করতে পারবেন — কাজের বিবরণে আপনার প্রয়োজন খুলে বলুন অথবা পছন্দের ক্যাটাগরি বেছে নিন (ভুয়া পোস্ট রোধে শুধু ফোন OTP যাচাই)।"}
+            </p>
+            <div className="mt-2.5 flex flex-wrap gap-1.5 text-[11.5px] font-bold">
+              <Link
+                href="/work/any-work#post-form"
+                className="rounded-full border border-pine/25 bg-tint/70 px-2.5 py-1 text-pine transition-colors hover:bg-pine hover:text-paper"
+              >
+                {locale === "en" ? "✦ Custom / Any Work" : "✦ যেকোনো কাজ লিখুন"}
+              </Link>
+              <Link
+                href="/work/transportation#post-form"
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-ink transition-colors hover:border-pine/40"
+              >
+                {locale === "en" ? "🛵 Ride & Parcel" : "🛵 রাইড ও পার্সেল"}
+              </Link>
+              <Link
+                href="/work/skilled#post-form"
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-ink transition-colors hover:border-pine/40"
+              >
+                {locale === "en" ? "🔧 Skilled Technician" : "🔧 দক্ষ কারিগর"}
+              </Link>
+              <Link
+                href="/work/caregiver#post-form"
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-ink transition-colors hover:border-pine/40"
+              >
+                {locale === "en" ? "🩺 Caregiver" : "🩺 কেয়ারগিভার"}
+              </Link>
+              <Link
+                href="/work/pet-caretaker#post-form"
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-ink transition-colors hover:border-pine/40"
+              >
+                {locale === "en" ? "🐾 Pet Care" : "🐾 পেট কেয়ার"}
+              </Link>
+            </div>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -229,7 +288,7 @@ export function Hero() {
               href="/login"
               className="group inline-flex items-center justify-center gap-2 rounded-full bg-pine px-7 py-4 text-[16px] font-semibold text-paper shadow-[0_14px_34px_-10px_rgba(12,91,78,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-pine-dark"
             >
-              Worker হিসেবে join করুন
+              {h.joinWorkerCta}
               <ChevronRight
                 size={17}
                 className="transition-transform duration-300 group-hover:translate-x-1"
@@ -240,8 +299,18 @@ export function Hero() {
               className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink/12 bg-card px-7 py-4 text-[16px] font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:border-pine/40 hover:text-pine"
             >
               <SquarePen size={17} className="text-ochre-deep" />
-              কাজ পোস্ট করুন
+              {h.postJobCta}
             </a>
+            {!isStandalone && (
+              <button
+                type="button"
+                onClick={() => void triggerInstall()}
+                className="group inline-flex items-center justify-center gap-2 rounded-full border border-ochre/45 bg-ochre-soft/75 px-5 py-4 text-[14.5px] font-bold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-ochre hover:text-ink"
+              >
+                <Download size={16} className="text-ochre-deep group-hover:text-ink" />
+                {locale === "en" ? "Install App" : "অ্যাপ ইনস্টল"}
+              </button>
+            )}
           </motion.div>
 
           <motion.ul
@@ -250,19 +319,18 @@ export function Hero() {
             transition={{ duration: 0.9, delay: 1 }}
             className="mt-8 flex flex-wrap gap-x-6 gap-y-2"
           >
-            {[
-              { icon: BadgeCheck, text: "যাচাইকৃত প্রোফাইল" },
-              { icon: Timer, text: "গড়ে ৩ ঘণ্টায় ম্যাচিং" },
-              { icon: Wallet, text: "স্বচ্ছ মূল্য, লুকানো চার্জ নেই" },
-            ].map((c) => (
-              <li
-                key={c.text}
-                className="flex items-center gap-1.5 text-[13.5px] font-medium text-mist"
-              >
-                <c.icon size={15} className="text-pine" />
-                {c.text}
-              </li>
-            ))}
+            {h.bullets.map((text, idx) => {
+              const Icon = bulletIcons[idx] ?? BadgeCheck;
+              return (
+                <li
+                  key={text}
+                  className="flex items-center gap-1.5 text-[13.5px] font-medium text-mist"
+                >
+                  <Icon size={15} className="text-pine" />
+                  {text}
+                </li>
+              );
+            })}
           </motion.ul>
         </div>
 

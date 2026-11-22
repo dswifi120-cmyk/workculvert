@@ -3,10 +3,13 @@
 import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Check, LoaderCircle } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 type State = "idle" | "loading" | "done" | "error";
 
 export function EmailCapture() {
+  const { t } = useLanguage();
+  const c = t.cta;
   const [email, setEmail] = useState("");
   const [state, setState] = useState<State>("idle");
   const [message, setMessage] = useState("");
@@ -25,13 +28,13 @@ export function EmailCapture() {
       const data = (await res.json()) as { ok: boolean; error?: string };
       if (!res.ok || !data.ok) {
         setState("error");
-        setMessage(data.error ?? "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+        setMessage(data.error ?? t.postForm.genericErr);
         return;
       }
       setState("done");
     } catch {
       setState("error");
-      setMessage("নেটওয়ার্ক সমস্যা — আবার চেষ্টা করুন।");
+      setMessage(t.postForm.networkErr);
     }
   }
 
@@ -46,7 +49,7 @@ export function EmailCapture() {
             className="inline-flex items-center gap-2 rounded-full border border-mint/40 bg-mint/15 px-6 py-4 text-[15px] font-semibold text-mint"
           >
             <Check size={16} />
-            ধন্যবাদ! আপডেট সবার আগে আপনার ইনবক্সে যাবে।
+            {c.doneMsg}
           </motion.p>
         ) : (
           <motion.form
@@ -60,9 +63,9 @@ export function EmailCapture() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="আপনার ইমেইল ঠিকানা"
+              placeholder={c.emailPlaceholder}
               className="w-full min-w-0 flex-1 bg-transparent text-[15px] text-paper outline-none placeholder:text-paper/40"
-              aria-label="ইমেইল ঠিকানা"
+              aria-label={c.emailPlaceholder}
             />
             <button
               type="submit"
@@ -73,7 +76,7 @@ export function EmailCapture() {
                 <LoaderCircle size={16} className="animate-spin" />
               ) : (
                 <>
-                  আপডেট পান
+                  {c.submitBtn}
                   <ArrowRight
                     size={15}
                     className="transition-transform duration-300 group-hover:translate-x-0.5"

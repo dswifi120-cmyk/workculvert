@@ -1,7 +1,13 @@
+"use client";
+
 import { Reveal } from "@/components/motion-primitives";
 import { EmailCapture } from "@/components/landing/email-capture";
+import { useLanguage } from "@/components/language-provider";
 
 export function CTA() {
+  const { t } = useLanguage();
+  const c = t.cta;
+
   return (
     <section className="relative overflow-hidden bg-pine-deep py-24 text-paper sm:py-36">
       <div className="dots-bg-light absolute inset-0 opacity-40" />
@@ -11,27 +17,26 @@ export function CTA() {
       <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
         <Reveal>
           <p className="font-serif text-xl italic text-paper/60 sm:text-2xl">
-            দেরি করলে কিন্তু ভালো কর্মীরা —
+            {c.preTitle}
           </p>
         </Reveal>
         <Reveal delay={0.1}>
           <h2 className="mt-4 text-[clamp(2.1rem,6vw,4.2rem)] font-bold leading-[1.25] tracking-[-0.01em] text-paper">
-            আগেই <span className="font-serif text-mint">বুকিং</span> হয়ে যাবে।
+            {c.line1Prefix}{" "}
+            <span className="font-serif text-mint">{c.line1Highlight}</span>{" "}
+            {c.line1Suffix}
             <br />
-            আজই শুরু করুন।
+            {c.line2}
           </h2>
         </Reveal>
         <Reveal delay={0.18}>
           <p className="mx-auto mt-5 max-w-xl text-[15px] leading-[1.85] text-paper/65 sm:text-base">
-            নতুন এলাকা, নতুন ক্যাটাগরি আর নিরাপদ পেমেন্ট ফিচার লঞ্চ হচ্ছে শীঘ্রই।
-            ইমেইল দিন — লঞ্চের দিনেই জেনে নিন, সাথে ফ্রি অনবোর্ডিং সাপোর্ট।
+            {c.copy}
           </p>
         </Reveal>
         <Reveal delay={0.26}>
           <EmailCapture />
-          <p className="mt-5 text-[12.5px] text-paper/45">
-            স্প্যাম নেই · যেকোনো সময় আনসাবস্ক্রাইব · সপ্তাহে মাত্র ১টি ইমেইল
-          </p>
+          <p className="mt-5 text-[12.5px] text-paper/45">{c.note}</p>
         </Reveal>
       </div>
     </section>

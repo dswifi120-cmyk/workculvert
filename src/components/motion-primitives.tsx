@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { motion, useInView, animate } from "motion/react";
 import { formatNumber } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -48,6 +49,8 @@ export function Counter({
   duration?: number;
   className?: string;
 }) {
+  const { locale } = useLanguage();
+  const useBengali = locale === "bn";
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
 
@@ -58,15 +61,18 @@ export function Counter({
       duration,
       ease: EASE,
       onUpdate(v) {
-        node.textContent = prefix + formatNumber(v, decimals, true) + suffix;
+        node.textContent =
+          prefix + formatNumber(v, decimals, useBengali) + suffix;
       },
     });
     return () => controls.stop();
-  }, [inView, to, prefix, suffix, decimals, duration]);
+  }, [inView, to, prefix, suffix, decimals, duration, useBengali]);
 
   return (
     <span ref={ref} className={className}>
-      {prefix}০{suffix}
+      {prefix}
+      {useBengali ? "০" : "0"}
+      {suffix}
     </span>
   );
 }

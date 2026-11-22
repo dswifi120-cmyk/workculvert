@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { workers } from "@/db/schema";
 import { getCurrentWorker } from "@/lib/auth";
 
@@ -12,15 +12,18 @@ export async function POST(req: Request) {
 
   const form = await req.formData();
   const currentLocation = String(form.get("currentLocation") ?? "").trim();
+  const preferredAreas = String(form.get("preferredAreas") ?? "").trim();
   const isActive = form.get("isActive") === "on";
   const bio = String(form.get("bio") ?? "").trim();
 
+  const db = await getDb();
   await db
     .update(workers)
     .set({
       currentLocation: currentLocation || worker.currentLocation,
+      preferredAreas: preferredAreas || worker.preferredAreas,
       isActive,
-      bio: bio.slice(0, 400),
+      bio: bio.slice(0, 500),
     })
     .where(eq(workers.id, worker.id));
 

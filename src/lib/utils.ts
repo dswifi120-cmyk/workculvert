@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { Locale } from "@/lib/categories";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -10,6 +11,11 @@ const BN_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮"
 /** Convert latin digits of any number/string to Bengali digits. */
 export function bn(value: number | string): string {
   return String(value).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
+}
+
+/** Format digits according to active locale ("bn" -> Bengali digits, "en" -> Latin digits). */
+export function localizeDigits(value: number | string, locale: Locale = "bn"): string {
+  return locale === "en" ? String(value) : bn(value);
 }
 
 /** Format a number with thousand separators, optionally in Bengali digits. */
@@ -23,8 +29,24 @@ export function formatNumber(n: number, decimals = 0, bengali = true) {
 
 /** Human friendly Bengali relative time, e.g. "৩ ঘণ্টা আগে". */
 export function timeAgoBn(date: Date): string {
+  return timeAgo(date, "bn");
+}
+
+/** Locale-aware relative time ("bn" | "en"). */
+export function timeAgo(date: Date, locale: Locale = "bn"): string {
   const diffMs = Date.now() - new Date(date).getTime();
   const mins = Math.floor(diffMs / 60000);
+  if (locale === "en") {
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "Yesterday";
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    return `${weeks}w ago`;
+  }
   if (mins < 1) return "এইমাত্র";
   if (mins < 60) return `${bn(mins)} মিনিট আগে`;
   const hours = Math.floor(mins / 60);

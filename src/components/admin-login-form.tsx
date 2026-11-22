@@ -4,7 +4,8 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { AlertTriangle, ArrowLeft, HardHat, LoaderCircle, Lock, Mail, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ArrowLeft, LoaderCircle, Lock, Mail, ShieldCheck } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 const inputCls =
   "w-full rounded-xl border border-line bg-paper/60 py-3.5 pl-11 pr-4 text-[15px] text-ink outline-none transition-colors placeholder:text-faint focus:border-pine focus:bg-card";
@@ -48,10 +49,9 @@ export function AdminLoginForm() {
         <div className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-mint/10 blur-[110px]" />
         <div className="absolute -right-20 bottom-10 h-72 w-72 rounded-full bg-ochre/10 blur-[110px]" />
         <div className="relative flex flex-1 flex-col justify-between p-12">
-          <span className="flex items-center gap-2.5">
-            <span className="grid size-9 place-items-center rounded-xl bg-ochre text-ink"><HardHat size={18} strokeWidth={2.2} /></span>
-            <span className="font-latin text-lg font-bold">Work<span className="text-ochre">Culvert</span> Admin</span>
-          </span>
+          <Link href="/">
+            <BrandLogo theme="dark" size="md" subtitle="Central Admin Console" />
+          </Link>
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[12px] font-semibold text-mint">
               <ShieldCheck size={12} /> private operations console
